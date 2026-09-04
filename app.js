@@ -8,13 +8,13 @@ const SAMPLE = {
 };
 
 const state = { deck: null, view: 'guide', savedSaves: [] };
-let pendingDeleteIndex = null;
-const $ = (selector) => document.querySelector(selector);
 const SAVED_DECK_KEY = 'slideminer-saved-notes';
 const SUPABASE_URL = 'https://strcqbzsdfuddoftlhul.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ICAuhg_ujxd5c2xnopCXFA_rhklYD4d';
 const supabaseClient = window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 function getBrowserId() { let id = localStorage.getItem('slideminer-browser-id'); if (!id) { id = crypto.randomUUID(); localStorage.setItem('slideminer-browser-id', id); } return id; }
+let pendingDeleteIndex = null;
+const $ = (selector) => document.querySelector(selector);
 
 function extractId(value) {
   const match = value.match(/\/presentation\/d\/([a-zA-Z0-9_-]+)/);
@@ -245,9 +245,11 @@ $('#outline').addEventListener('click', (event) => {
   document.querySelector(`#slide-${button.dataset.slide}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 $('#copy-button').addEventListener('click', async () => { await navigator.clipboard.writeText(markdown()); $('#copy-button').textContent = 'Copied'; setTimeout(() => { $('#copy-button').textContent = 'Copy study guide'; }, 1400); });
+$('#save-button').addEventListener('click', async () => { if (!state.deck) return; localStorage.setItem(SAVED_DECK_KEY, JSON.stringify(state.deck)); $('#save-button').textContent = 'Saving...'; if (supabaseClient) { const { error } = await supabaseClient.from('saved_notes').upsert({ browser_id: getBrowserId(), title: state.deck.title, deck: state.deck, updated_at: new Date().toISOString() }, { onConflict: 'browser_id,title' }); if (error) { $('#save-button').textContent = 'Saved locally'; setError(`Cloud save unavailable, but your notes are saved in this browser. ${error.message}`); } else { $('#save-button').textContent = 'Saved locally + cloud'; } } else { $('#save-button').textContent = 'Notes saved'; } setTimeout(() => { $('#save-button').textContent = 'Save notes'; }, 1800); });
 $('#save-button').addEventListener('click', async () => { if (!state.deck) return; localStorage.setItem(SAVED_DECK_KEY, JSON.stringify(state.deck)); $('#save-button').textContent = 'Saving...'; if (supabaseClient) { const { error } = await supabaseClient.from('saved_notes').upsert({ browser_id: getBrowserId(), title: state.deck.title, deck: state.deck, updated_at: new Date().toISOString() }, { onConflict: 'browser_id,title' }); if (error) { $('#save-button').textContent = 'Saved locally'; setError(`Cloud save is not set up yet. Your notes are saved in this browser. ${error.message}`); } else { $('#save-button').textContent = 'Saved locally + cloud'; } } else { $('#save-button').textContent = 'Notes saved'; } setTimeout(() => { $('#save-button').textContent = 'Save notes'; }, 1800); });
 $('#download-button').addEventListener('click', () => { const blob = new Blob([markdown()], { type: 'text/markdown' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `${state.deck.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'slides'}-study-guide.md`; link.click(); URL.revokeObjectURL(link.href); });
 document.addEventListener('keydown', (event) => { if (event.target.matches('.slides-url') && event.key === 'Enter') { event.preventDefault(); $('#mine-button').click(); } });
+try { const savedDeck = JSON.parse(localStorage.getItem(SAVED_DECK_KEY)); if (savedDeck?.slides?.length) renderDeck(savedDeck); } catch { localStorage.removeItem(SAVED_DECK_KEY); }
 try { const savedDeck = JSON.parse(localStorage.getItem(SAVED_DECK_KEY)); if (savedDeck?.slides?.length) renderDeck(savedDeck); } catch { localStorage.removeItem(SAVED_DECK_KEY); }
 document.querySelectorAll('.nav-tab').forEach((tab) => tab.addEventListener('click', () => { const showingSaved = tab.dataset.section === 'saved'; document.querySelector('.hero').classList.toggle('is-hidden', showingSaved); document.querySelector('.workspace').classList.toggle('is-hidden', showingSaved); document.querySelector('#results').classList.toggle('is-hidden', showingSaved || !state.deck); document.querySelector('#saved').classList.toggle('is-hidden', !showingSaved); document.querySelectorAll('.nav-tab').forEach((item) => item.classList.toggle('is-active', item === tab)); if (showingSaved) loadSaves(); }));
 $('#refresh-saves').addEventListener('click', loadSaves);
