@@ -13,6 +13,7 @@
 <body>
   <header class="topbar">
     <a class="brand" href="#top" aria-label="SlideMiner home"><span class="brand-mark">S</span><span>slide<span class="brand-muted">miner</span></span></a>
+    <nav class="topnav" aria-label="Main navigation"><button class="nav-tab is-active" data-section="top" type="button">Mine</button><button class="nav-tab" data-section="saved" type="button">Saved notes</button></nav>
     <div class="topbar-note"><span class="status-dot"></span>Runs in your browser</div>
   </header>
 
@@ -24,6 +25,12 @@
         <p class="lede">Drop in a Google Slides link. SlideMiner pulls out the ideas, evidence, links, notes, and structure hiding inside the deck.</p>
       </div>
       <div class="hero-stamp" aria-hidden="true"><span>SLIDE<br>→<br>STUDY</span></div>
+    </section>
+
+    <section id="saved" class="saved-section is-hidden" aria-labelledby="saved-title">
+      <div class="section-kicker"><span>02</span><span class="rule"></span><span>YOUR SAVES</span></div>
+      <div class="saved-heading"><div><h2 id="saved-title">Saved notes</h2><p>Pick up where you left off.</p></div><button id="refresh-saves" class="secondary-button" type="button">Refresh saves</button></div>
+      <div id="saved-grid" class="saved-grid"></div>
     </section>
 
     <section class="workspace" aria-labelledby="import-title">
@@ -76,7 +83,7 @@
     <section id="results" class="results-section is-hidden" aria-live="polite">
       <div class="result-heading">
         <div><div class="section-kicker"><span>02</span><span class="rule"></span><span>YOUR DECK</span></div><h2 id="deck-title">Presentation</h2><p id="deck-subtitle">Extracted content</p></div>
-        <div class="result-actions"><button id="copy-button" class="secondary-button" type="button">Copy study guide</button><button id="download-button" class="primary-button" type="button"><span>Download .md</span><span class="button-arrow">↓</span></button></div>
+        <div class="result-actions"><button id="save-button" class="secondary-button" type="button">Save notes</button><button id="copy-button" class="secondary-button" type="button">Copy study guide</button><button id="download-button" class="primary-button" type="button"><span>Download .md</span><span class="button-arrow">↓</span></button></div>
       </div>
       <div id="quick-answers" class="quick-answers"></div>
       <div id="stats" class="stats-row"></div>
@@ -88,11 +95,15 @@
     </section>
 
     <div id="error-box" class="error-box is-hidden" role="alert"></div>
+    <div id="delete-dialog" class="delete-dialog is-hidden" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+      <div class="delete-dialog-panel"><span class="mini-label">CONFIRM DELETION</span><h2 id="delete-dialog-title">Delete these notes?</h2><p id="delete-dialog-copy">This saved study set will be removed.</p><div class="delete-dialog-actions"><button id="cancel-delete" class="secondary-button" type="button">Cancel</button><button id="confirm-delete" class="danger-button" type="button">Delete notes</button></div></div>
+    </div>
   </main>
   <footer><span>SLIDEMINER / 2026</span><span>Built for the messy middle of research.</span></footer>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script type="module">import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs'; window.pdfjsLib = pdfjsLib;</script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
