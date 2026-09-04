@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Turn Google Slides into clean study notes, text, links, and slide data.">
+  <title>SlideMiner | Google Slides study tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="SlideMiner home"><span class="brand-mark">S</span><span>slide<span class="brand-muted">miner</span></span></a>
+    <div class="topbar-note"><span class="status-dot"></span>Runs in your browser</div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">ASSIGNMENT RESEARCH TOOL <span>●</span> 01</p>
+        <h1>Make your slides<br><em>useful.</em></h1>
+        <p class="lede">Drop in a Google Slides link. SlideMiner pulls out the ideas, evidence, links, notes, and structure hiding inside the deck.</p>
+      </div>
+      <div class="hero-stamp" aria-hidden="true"><span>SLIDE<br>→<br>STUDY</span></div>
+    </section>
+
+    <section class="workspace" aria-labelledby="import-title">
+      <div class="section-kicker"><span>01</span><span class="rule"></span><span>IMPORT DECK</span></div>
+      <div class="import-grid">
+        <div class="input-panel">
+          <h2 id="import-title">What should we mine?</h2>
+          <label>Google Slides URLs</label>
+          <div id="url-list" class="url-list">
+            <div class="url-entry"><input class="slides-url" type="url" placeholder="https://docs.google.com/presentation/d/..." autocomplete="off"><button class="remove-url" type="button" aria-label="Clear link">×</button></div>
+          </div>
+          <button id="add-url" class="add-url" type="button">+ Add another link</button>
+          <button id="mine-button" class="primary-button" type="button"><span>Mine deck</span><span class="button-arrow">↗</span></button>
+          <p id="url-hint" class="field-hint">Add one link per box. Public “Anyone with the link” decks can be tried without credentials.</p>
+          <details class="auth-details">
+            <summary>Connection settings <span>optional</span></summary>
+            <div class="auth-fields">
+              <div>
+                <label for="api-key">Google API key <span>for public/shared decks</span></label>
+                <input id="api-key" type="password" placeholder="AIza..." autocomplete="off">
+              </div>
+              <div>
+                <label for="access-token">OAuth access token <span>for private decks</span></label>
+                <input id="access-token" type="password" placeholder="ya29..." autocomplete="off">
+              </div>
+              <div>
+                <label for="ai-key">Gemini API key <span>optional: semantic study analysis</span></label>
+                <input id="ai-key" type="password" placeholder="AIza..." autocomplete="off">
+              </div>
+            </div>
+            <p class="security-note">Keys stay in this tab and are not saved. Gemini analysis sends the extracted deck text to Google for semantic sorting.</p>
+          </details>
+          <div class="demo-row"><span>Need a quick look?</span><button id="demo-button" class="text-button" type="button">Load sample deck <span>↗</span></button></div>
+          <div class="upload-divider"><span>OR USE YOUR SCHOOL ACCOUNT</span></div>
+          <label for="deck-file" class="file-picker" id="drop-zone"><span><b>Or upload decks, PDFs, or scans</b><small>Choose files or drag multiple PowerPoints, PDFs, JPGs, PNGs, or WEBPs here</small></span><strong>Choose files</strong></label>
+          <input id="deck-file" class="visually-hidden" type="file" accept=".pptx,.pdf,.txt,.json,.jpg,.jpeg,.png,.webp" multiple>
+        </div>
+        <aside class="how-panel">
+          <span class="mini-label">THE SHORT VERSION</span>
+          <ol>
+            <li><b>Paste</b><span>your Slides link</span></li>
+            <li><b>Connect</b><span>with a key or token</span></li>
+            <li><b>Export</b><span>notes for your work</span></li>
+          </ol>
+          <div class="privacy-lock"><span>⌁</span><div><b>Local-first</b><small>Your results never leave this page.</small></div></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="results" class="results-section is-hidden" aria-live="polite">
+      <div class="result-heading">
+        <div><div class="section-kicker"><span>02</span><span class="rule"></span><span>YOUR DECK</span></div><h2 id="deck-title">Presentation</h2><p id="deck-subtitle">Extracted content</p></div>
+        <div class="result-actions"><button id="copy-button" class="secondary-button" type="button">Copy study guide</button><button id="download-button" class="primary-button" type="button"><span>Download .md</span><span class="button-arrow">↓</span></button></div>
+      </div>
+      <div id="quick-answers" class="quick-answers"></div>
+      <div id="stats" class="stats-row"></div>
+      <div class="results-layout">
+        <aside id="outline" class="outline-panel"></aside>
+        <div class="content-panel"><div class="view-tabs"><button class="tab is-active" data-view="guide" type="button">Study guide</button><button class="tab" data-view="slides" type="button">Slide text</button><button class="tab" data-view="links" type="button">Links & media</button></div><div id="content-view"></div></div>
+      </div>
+      <section id="test-notes" class="test-notes" aria-labelledby="test-notes-title"></section>
+    </section>
+
+    <div id="error-box" class="error-box is-hidden" role="alert"></div>
+  </main>
+  <footer><span>SLIDEMINER / 2026</span><span>Built for the messy middle of research.</span></footer>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script type="module">import * as pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs'; window.pdfjsLib = pdfjsLib;</script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
